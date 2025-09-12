@@ -1,0 +1,1 @@
+based on some of my repositories tell me how i can creaete a project by combining all of my failed projects that dont work well. https://github.com/istreep-14/c16/tree/main https://github.com/istreep-14/c17/tree/main/apps-script https://github.com/istreep-14/c17/tree/main https://github.com/istreep-14/c16/tree/aa4547c71772c8da9930dd5885bd1ddba7382e8e
