@@ -6,7 +6,22 @@ function fetchArchivesIndex_(username) {
   const code = resp.getResponseCode();
   if (code !== 200) throw new Error(`Archives index fetch failed: ${code}`);
   const data = JSON.parse(resp.getContentText());
-  return data.archives || [];
+  const list = Array.isArray(data.archives) ? data.archives : [];
+  // Deduplicate by exact URL and by derived year-month to avoid repeats
+  const seenUrls = new Set();
+  const seenMonths = new Set();
+  const out = [];
+  for (let i = 0; i < list.length; i++) {
+    const u = String(list[i] || '');
+    if (!u) continue;
+    const ym = ymFromArchiveUrl_(u) || '';
+    if (seenUrls.has(u)) continue;
+    if (ym && seenMonths.has(ym)) continue;
+    seenUrls.add(u);
+    if (ym) seenMonths.add(ym);
+    out.push(u);
+  }
+  return out;
 }
 
 function ymFromArchiveUrl_(archiveUrl) {

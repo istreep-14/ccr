@@ -73,6 +73,16 @@ function processMonthsAppendOnly_(monthIds) {
     var lastSeenT = Number(meta.lastSeenEndTime || 0) || 0;
     var lastSeenUrl = String(meta.lastSeenUrl || '');
     var games = res.games || [];
+    // Deduplicate by URL to avoid repeats
+    var seenUrls = {};
+    var uniqueGames = [];
+    for (var gi = 0; gi < games.length; gi++) {
+      var guAll = String(games[gi].url || '');
+      if (!guAll || seenUrls[guAll]) continue;
+      seenUrls[guAll] = true;
+      uniqueGames.push(games[gi]);
+    }
+    games = uniqueGames;
     games.sort(function(a,b){
       var at = Number(a.end_time||0), bt = Number(b.end_time||0);
       if (at !== bt) return at - bt;
