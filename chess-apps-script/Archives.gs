@@ -4,13 +4,19 @@ function listArchivesAndRecord_() {
   var sheets = ensureAllSheets_();
   var archives = fetchArchivesList_(username);
   var months = [];
+  var seenMonths = {};
+  var seenUrls = {};
   for (var i = 0; i < archives.length; i++) {
-    var url = archives[i];
+    var url = String(archives[i] || '');
+    if (!url || seenUrls[url]) continue;
     var parts = url.split('/');
     var year = Number(parts[parts.length - 2]);
     var month = Number(parts[parts.length - 1]);
     var monthId = year + '-' + (month < 10 ? '0' + month : month);
+    if (seenMonths[monthId]) continue;
     months.push({ monthId: monthId, url: url });
+    seenMonths[monthId] = true;
+    seenUrls[url] = true;
   }
   months.sort(function(a,b){ return a.monthId < b.monthId ? -1 : (a.monthId > b.monthId ? 1 : 0); });
 

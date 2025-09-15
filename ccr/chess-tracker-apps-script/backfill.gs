@@ -77,8 +77,17 @@ function continueBackfill() {
         continue;
       }
       etagByMonth[ym] = fetched.etag || '';
-      monthlyGamesRaw[ym] = fetched.games;
-      const parsedRows = parseGamesForUser_(username, ym, fetched.games)
+      // Deduplicate games by URL for stability
+      const seenGameIds = new Set();
+      const uniqueGames = [];
+      for (const g of (fetched.games || [])) {
+        const gid = String(g.url || '');
+        if (!gid || seenGameIds.has(gid)) continue;
+        seenGameIds.add(gid);
+        uniqueGames.push(g);
+      }
+      monthlyGamesRaw[ym] = uniqueGames;
+      const parsedRows = parseGamesForUser_(username, ym, uniqueGames)
         .filter(r => !knownIds.has(String(r[0])));
       if (parsedRows.length > 0) newGameRowsByMonth[ym] = parsedRows;
     }

@@ -8,6 +8,16 @@ function deriveGameRow_(username, game) {
   var timeControl = game.time_control || '';
   var eco = (game.opening && game.opening.eco) || '';
   var ecoUrl = (game.opening && game.opening.url) || '';
+  // Fallback to PGN headers if not present in JSON
+  if ((!timeControl || !eco || !ecoUrl) && game.pgn) {
+    try {
+      var p = PGN.parseHeadersAndMoves(game.pgn);
+      var h = p.headers || {};
+      if (!timeControl && h.timecontrol) timeControl = h.timecontrol;
+      if (!eco && h.eco) eco = h.eco;
+      if (!ecoUrl && eco) ecoUrl = 'https://www.chess.com/openings?eco=' + encodeURIComponent(eco);
+    } catch (e) {}
+  }
   var utcStart = game.start_time ? new Date(game.start_time * 1000) : null;
   var utcEnd = game.end_time ? new Date(game.end_time * 1000) : null;
   var duration = (game.end_time && game.start_time) ? Math.max(0, Number(game.end_time) - Number(game.start_time)) : '';
@@ -41,6 +51,12 @@ function deriveGameRow_(username, game) {
   var terminationClean = '';
   if (game.termination) {
     terminationClean = String(game.termination).replace(/_/g, ' ');
+  } else if (game.pgn) {
+    try {
+      var p2 = PGN.parseHeadersAndMoves(game.pgn);
+      var h2 = p2.headers || {};
+      if (h2.termination) terminationClean = String(h2.termination).replace(/_/g, ' ');
+    } catch (e2) {}
   }
 
   var gameType = (timeClass === 'daily') ? 'daily' : 'live';
